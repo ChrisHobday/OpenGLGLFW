@@ -24,15 +24,13 @@ source-repository head
   location: https://github.com/githubuser/ChrisHobday
 
 library
-  exposed-modules:
-      Lib
   other-modules:
       Paths_OpenGLGLFW
   hs-source-dirs:
       src
   build-depends:
       GLFW-b
-    , OpenGLRaw
+    , OpenGL
     , base >=4.7 && <5
   default-language: Haskell2010
 
@@ -45,8 +43,8 @@ executable OpenGLGLFW-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GLFW-b
+    , OpenGL
     , OpenGLGLFW
-    , OpenGLRaw
     , base >=4.7 && <5
   default-language: Haskell2010
 
@@ -60,7 +58,7 @@ test-suite OpenGLGLFW-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GLFW-b
+    , OpenGL
     , OpenGLGLFW
-    , OpenGLRaw
     , base >=4.7 && <5
   default-language: Haskell2010

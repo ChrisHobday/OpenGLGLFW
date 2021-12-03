@@ -1,29 +1,18 @@
 module Main where
 
-import Lib
-
-import Control.Monad (when)
-import Control.Exception (bracket)
+import Control.Monad ( when, unless )
+import Control.Exception ( bracket )
 
 import qualified Graphics.UI.GLFW as GLFW
-import Graphics.GL.Core33
-import Graphics.GL.Types
+import Graphics.Rendering.OpenGL as GL
 
-
-
-winWidth = 800
-winHeight = 600
-winTitle = "Hello Window"
-
--- type KeyCallback = Window -> Key -> Int -> KeyState -> ModifierKeys -> IO ()
+-- Callback for when a key is pressed
 keyCallback :: GLFW.KeyCallback
 keyCallback window key scanCode keyState modKeys = do
-  -- jsp <- GLFW.joystickPresent GLFW.Joystick'1
-  -- print jsp
-  print key
   when (key == GLFW.Key'Escape && keyState == GLFW.KeyState'Pressed)
     (GLFW.setWindowShouldClose window True)
 
+-- Callback for when a joystick is connected/disconnected
 joystickCallback :: GLFW.JoystickCallback
 joystickCallback joystick joystickState = do
   joystickName <- GLFW.getJoystickName joystick
@@ -33,43 +22,37 @@ joystickCallback joystick joystickState = do
     GLFW.JoystickState'Disconnected ->
       putStrLn $ show joystickName ++ " disconnected"
 
-
 -- | Ensures that we only run GLFW code while it's initialized, and also that we
 -- always terminate it when we're done.
 bracketGLFW :: IO () -> IO ()
 bracketGLFW act = bracket GLFW.init (const GLFW.terminate) $ \initWorked ->
     when initWorked act
 
+loop :: GLFW.Window -> IO ()
+loop window = do
+  -- Get whether or not the window should close
+  shouldClose <- GLFW.windowShouldClose window
+  -- If the window shouldn't close execute do block
+  unless shouldClose $ do
+    -- Poll events from set callbacks
+    GLFW.pollEvents
+    -- Drawing
+    GL.clearColor $= Color4 1.0 0.3 0.3 1.0
+    GL.clear [ColorBuffer]
+    GLFW.swapBuffers window
+    -- Loop again
+    loop window
+  -- Destroy window
+  GLFW.destroyWindow window
+  -- Terminate GLFW
+  GLFW.terminate
+
 main :: IO ()
 main = do
   GLFW.init
-  GLFW.windowHint (GLFW.WindowHint'ContextVersionMajor 3)
-  GLFW.windowHint (GLFW.WindowHint'ContextVersionMinor 3)
-  GLFW.windowHint (GLFW.WindowHint'OpenGLProfile GLFW.OpenGLProfile'Core)
-  GLFW.windowHint (GLFW.WindowHint'Resizable False)
-  maybeWindow <- GLFW.createWindow winWidth winHeight winTitle Nothing Nothing
-  case maybeWindow of
-    Nothing -> putStrLn "Failed to create a GLFW window!"
-    Just window -> do
-        -- enable keys
-        GLFW.setKeyCallback window (Just keyCallback)
-        -- set joystick callback
-        GLFW.setJoystickCallback (Just joystickCallback)
-        -- calibrate the viewport
-        GLFW.makeContextCurrent (Just window)
-        (x,y) <- GLFW.getFramebufferSize window
-        glViewport 0 0 (fromIntegral x) (fromIntegral y)
-        -- enter our main loop
-        let loop = do
-                shouldContinue <- not <$> GLFW.windowShouldClose window
-                when shouldContinue $ do
-                    -- event poll
-                    GLFW.pollEvents
-                    -- drawing
-                    glClearColor 0.2 0.3 0.3 1.0
-                    glClear GL_COLOR_BUFFER_BIT
-                    -- swap buffers and go again
-                    GLFW.swapBuffers window
-                    loop
-        loop
-  GLFW.terminate
+  GLFW.defaultWindowHints
+  Just window <- GLFW.createWindow 800 600 "Window" Nothing Nothing
+  GLFW.setKeyCallback window (Just keyCallback)
+  GLFW.setJoystickCallback (Just joystickCallback)
+  GLFW.makeContextCurrent (Just window)
+  loop window
