@@ -6,6 +6,9 @@ import Control.Exception ( bracket )
 import qualified Graphics.UI.GLFW as GLFW
 import Graphics.Rendering.OpenGL as GL
 
+myPoints :: [(GLfloat,GLfloat,GLfloat)]
+myPoints = [ (sin (2*pi*k/12), cos (2*pi*k/12), 0) | k <- [1..12] ]
+
 -- Callback for when a key is pressed
 keyCallback :: GLFW.KeyCallback
 keyCallback window key scanCode keyState modKeys = do
@@ -39,6 +42,8 @@ loop window = do
     -- Drawing
     GL.clearColor $= Color4 1.0 0.3 0.3 1.0
     GL.clear [ColorBuffer]
+    renderPrimitive Points $
+      mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
     GLFW.swapBuffers window
     -- Loop again
     loop window
