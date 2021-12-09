@@ -39,10 +39,10 @@ loop window = do
   unless shouldClose $ do
     -- Poll events from set callbacks
     GLFW.pollEvents
-    -- Drawing
+    -- Drawing/Rendering
     GL.clearColor $= Color4 1.0 0.3 0.3 1.0
     GL.clear [ColorBuffer]
-    renderPrimitive Points $
+    renderPrimitive Triangles $
       mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
     GLFW.swapBuffers window
     -- Loop again
