@@ -42,7 +42,7 @@ loop window = do
     -- Drawing/Rendering
     GL.clearColor $= Color4 1.0 0.3 0.3 1.0
     GL.clear [ColorBuffer]
-    renderPrimitive Triangles $
+    renderPrimitive TriangleFan $
       mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
     GLFW.swapBuffers window
     -- Loop again
