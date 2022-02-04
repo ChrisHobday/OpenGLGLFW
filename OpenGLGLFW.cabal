@@ -24,6 +24,9 @@ source-repository head
   location: https://github.com/githubuser/ChrisHobday
 
 library
+  exposed-modules:
+      Drawable
+      Rectangle
   other-modules:
       Paths_OpenGLGLFW
   hs-source-dirs:
